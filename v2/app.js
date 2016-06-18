@@ -20,40 +20,31 @@ module.exports = {
     this.middleware.push(fn);
     return this;
   },
-  // convert: function  (mw) {
- //    function * createGenerator (next) {
- //      return yield next()
- //    }
- //
- //    if (typeof mw !== 'function') {
- //      throw new TypeError('middleware must be a function')
- //    }
- //    if (mw.constructor.name !== 'GeneratorFunction') {
- //      // assume it's Promise-based middleware
- //      return mw
- //    }
- //    const converted = function (ctx, next) {
- //      return co.call(ctx, mw.call(ctx, createGenerator(next)))
- //    }
- //    converted._name = mw._name || mw.name
- //
- //    return converted
- //  },
+  compose: function(middleware){
+    function *noop(){}
+    
+    return function *(next){
+      if (!next) next = noop();
+
+      var i = middleware.length;
+
+      while (i--) {
+        next = convert(this.middleware[i]) //.call(this, next);
+      }
+
+      return yield *next;
+    }
+  },
   callback: function (cb) {
-    const fn = compose(this.middleware);
+    const fn = this.compose(this.middleware);
     debug('callback compose fn = ' + fn)
+    
     var ctx = {
       
     }
-     
-    fn(ctx, function(){return Promise.resolve()}).then(function () {
-      console.log(this)
+
+    fn(ctx).then(function(){
+
     })
-     
-    
-    // co(fn).call(ctx);
-    // fn(ctx).then(function(){
-//
-//     })
   }
 }
